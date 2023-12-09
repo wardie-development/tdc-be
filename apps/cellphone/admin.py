@@ -25,11 +25,13 @@ class CellphoneWriterAdmin(admin.ModelAdmin):
 
 @admin.register(CellphoneAccess)
 class CellphoneAccessAdmin(admin.ModelAdmin):
-    list_display = ["whatsapp", "created_at", "updated_at", "is_access_expired", "send_whatsapp_message"]
+    list_display = ["formatted_whatsapp", "created_at", "valid_until", "is_access_expired", "send_whatsapp_message"]
     search_fields = ["whatsapp"]
     fieldsets = (
-        ("Criar Acesso", {"fields": ("whatsapp", "days_to_expire")}),
+        ("Criar Acesso", {"fields": ("whatsapp", "days_to_expire", "password")}),
     )
+    actions = ["renew_access"]
+    readonly_fields = ["password"]
 
     @staticmethod
     def send_whatsapp_message(access):
@@ -45,3 +47,10 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
         )
 
     send_whatsapp_message.short_description = "Enviar mensagem no whatsapp"
+
+    def renew_access(self, _request, queryset):
+        for access in queryset:
+            access.renew_access()
+            access.save()
+
+    renew_access.short_description = "Renovar acesso"

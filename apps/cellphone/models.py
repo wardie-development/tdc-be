@@ -144,9 +144,9 @@ class CellphoneAccess(BaseModel):
         super().save(*args, **kwargs)
 
     def renew_access(self):
-        self.valid_until = self.created_at + timedelta(days=self.days_to_expire)
+        self.valid_until = timezone.now() + timedelta(days=self.days_to_expire)
         if self.password is None:
-            self.password = User.objects.make_random_password(length=6)
+            self.password = User.objects.make_random_password(length=6).lower()
 
     def is_access_expired(self):
         return self.valid_until < timezone.now()
@@ -158,3 +158,7 @@ class CellphoneAccess(BaseModel):
             f"{whatsapp_link}?phone=55{self.whatsapp}"
             f"&text={self.whatsapp_message}"
         )
+
+    @property
+    def formatted_whatsapp(self):
+        return f"({self.whatsapp[:2]}) {self.whatsapp[2:7]}-{self.whatsapp[7:]}"
