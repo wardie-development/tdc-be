@@ -20,3 +20,9 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         token = serializer.save()
 
         return Response({"token": token.token})
+
+    @action(detail=False, methods=["get"], url_path="name")
+    def list_name(self, request):
+        names = Brand.objects.values("name")
+
+        return Response(names)

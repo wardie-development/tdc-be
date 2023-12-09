@@ -211,6 +211,7 @@ class CellphoneAccessToken(BaseModel):
     def renew_token_if_expired(self):
         if self.is_expired:
             self.token = uuid.uuid4().hex
+            self.created_at = timezone.now()
             self.save()
 
     @property
