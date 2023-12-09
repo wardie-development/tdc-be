@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 from django.db import models
@@ -17,9 +18,36 @@ class Brand(BaseModel):
     def __str__(self):
         return self.name
 
+    mapped_colors = {
+        "Samsung": "#2459AA",
+        "Motorola": "#d10305",
+        "Xiaomi": "#f85e12",
+        "Apple": "#414c65",
+        "LG": "#1a9d68",
+        "Asus": "#655241",
+        "Oppo": "#23998b"
+    }
+
+    def to_representation(self):
+        return {
+                "title": f"Películas para {self.name}",
+                "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
+                "cellphones": [
+                    {
+                        "brand": self.name,
+                        "model": cellphone.model,
+                        "compatibilities": [
+                            compatibility.name
+                            for compatibility in cellphone.cellphone_screen_protector_compatibilities.all()
+                        ],
+                    }
+                    for cellphone in self.cellphones.all()
+                ]
+            }
+
 
 class Cellphone(BaseModel):
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name="Marca")
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones")
     model = models.CharField(max_length=255, verbose_name="Modelo")
     cellphone_screen_protector_compatibilities = models.ManyToManyField(
         "self",
@@ -162,3 +190,31 @@ class CellphoneAccess(BaseModel):
     @property
     def formatted_whatsapp(self):
         return f"({self.whatsapp[:2]}) {self.whatsapp[2:7]}-{self.whatsapp[7:]}"
+
+
+class CellphoneAccessToken(BaseModel):
+    access = models.ForeignKey(CellphoneAccess, on_delete=models.CASCADE, verbose_name="Acesso", related_name="tokens")
+    token = models.CharField(max_length=255, verbose_name="Token")
+
+    class Meta:
+        verbose_name = "Token de acesso"
+        verbose_name_plural = "Tokens de acesso"
+
+    def __str__(self):
+        return self.token
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid.uuid4().hex
+        super().save(*args, **kwargs)
+
+    def renew_token_if_expired(self):
+        if self.is_expired:
+            self.token = uuid.uuid4().hex
+            self.save()
+
+    @property
+    def is_expired(self):
+        hours = 1
+        is_expired = self.created_at + timedelta(hours=hours) < timezone.now()
+        return is_expired
