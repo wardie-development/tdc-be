@@ -42,4 +42,7 @@ class CellphoneSuggestionsSerializer(serializers.ModelSerializer):
 
 class CellphoneSerializer(serializers.Serializer):
     def to_representation(self, instance):
+        access = self.context["access"]
+        instance.news_views.add(access)
+        instance.save()
         return instance.to_representation()

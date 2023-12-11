@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.cellphone.models import Brand, Cellphone
+from apps.cellphone.models import Brand, Cellphone, CellphoneAccessToken
 from apps.cellphone.permissions import IsAuthenticated
 from apps.cellphone.serializers import (
     BrandSerializer, CellphoneAuthenticationSerializer, CellphoneSuggestionsSerializer,
@@ -43,7 +43,16 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"])
     def news(self, request):
         three_days_ago = timezone.now() - timedelta(days=3)
-        news = Cellphone.objects.filter(created_at__gte=three_days_ago)
-        data = CellphoneSerializer(news, many=True).data
+        access = CellphoneAccessToken.objects.get(
+            token=request.headers.get("Authorization")
+        ).access
+
+        news = Cellphone.objects.filter(
+            created_at__gte=three_days_ago
+        ).exclude(
+            news_views__whatsapp=access
+        )
+
+        data = CellphoneSerializer(news, many=True, context={"access": access}).data
 
         return Response(data)

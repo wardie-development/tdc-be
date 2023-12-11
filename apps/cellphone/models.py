@@ -39,6 +39,61 @@ class Brand(BaseModel):
             }
 
 
+class CellphoneAccess(BaseModel):
+    whatsapp = models.CharField(max_length=255, verbose_name="Whatsapp")
+    password = models.CharField(max_length=255, verbose_name="Senha", null=True,
+                                blank=True)
+    valid_until = models.DateTimeField(verbose_name="Válido até", null=True, blank=True)
+    days_to_expire = models.PositiveIntegerField(verbose_name="Dias para expirar",
+                                                 default=30)
+
+    class Meta:
+        verbose_name = "Acesso"
+        verbose_name_plural = "Acessos"
+
+    def __str__(self):
+        return self.whatsapp
+
+    @property
+    def whatsapp_message(self):
+        return f"""
+        _Agora você é um(a) Cliente PLUS da TDC!_
+
+        A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*
+
+        Link de acesso:
+        https://app.tecnicosdecelular.com.br/tabela-plus/
+
+        Sua senha é valida até:
+        *{self.valid_until.strftime("%d/%m/%Y")} às {self.valid_until.strftime("%H:%M")}h*
+        """
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.renew_access()
+        super().save(*args, **kwargs)
+
+    def renew_access(self):
+        self.valid_until = timezone.now() + timedelta(days=self.days_to_expire)
+        if self.password is None:
+            self.password = User.objects.make_random_password(length=6).lower()
+
+    def is_access_expired(self):
+        return self.valid_until < timezone.now()
+
+    @property
+    def whatsapp_message_link(self):
+        whatsapp_link = "https://api.whatsapp.com/send"
+        return (
+            f"{whatsapp_link}?phone=55{self.whatsapp}"
+            f"&text={self.whatsapp_message}"
+        )
+
+    @property
+    def formatted_whatsapp(self):
+        return f"({self.whatsapp[:2]}) {self.whatsapp[2:7]}-{self.whatsapp[7:]}"
+
+
 class Cellphone(BaseModel):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones")
     model = models.CharField(max_length=255, verbose_name="Modelo")
@@ -47,6 +102,7 @@ class Cellphone(BaseModel):
         verbose_name="Compatibilidades com películas",
         blank=True
     )
+    news_views = models.ManyToManyField(CellphoneAccess, verbose_name="Visualizações de novidades", blank=True)
 
     class Meta:
         verbose_name = "Celular"
@@ -140,59 +196,6 @@ a marca na compatibilidade, desta forma: <br>
 
     def __str__(self):
         return "Cadastrador de celulares"
-
-
-class CellphoneAccess(BaseModel):
-    whatsapp = models.CharField(max_length=255, verbose_name="Whatsapp")
-    password = models.CharField(max_length=255, verbose_name="Senha", null=True, blank=True)
-    valid_until = models.DateTimeField(verbose_name="Válido até", null=True, blank=True)
-    days_to_expire = models.PositiveIntegerField(verbose_name="Dias para expirar", default=30)
-
-    class Meta:
-        verbose_name = "Acesso"
-        verbose_name_plural = "Acessos"
-
-    def __str__(self):
-        return self.whatsapp
-
-    @property
-    def whatsapp_message(self):
-        return f"""
-        _Agora você é um(a) Cliente PLUS da TDC!_
-        
-        A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*
-        
-        Link de acesso:
-        https://app.tecnicosdecelular.com.br/tabela-plus/
-        
-        Sua senha é valida até:
-        *{self.valid_until.strftime("%d/%m/%Y")} às {self.valid_until.strftime("%H:%M")}h*
-        """
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.renew_access()
-        super().save(*args, **kwargs)
-
-    def renew_access(self):
-        self.valid_until = timezone.now() + timedelta(days=self.days_to_expire)
-        if self.password is None:
-            self.password = User.objects.make_random_password(length=6).lower()
-
-    def is_access_expired(self):
-        return self.valid_until < timezone.now()
-
-    @property
-    def whatsapp_message_link(self):
-        whatsapp_link = "https://api.whatsapp.com/send"
-        return (
-            f"{whatsapp_link}?phone=55{self.whatsapp}"
-            f"&text={self.whatsapp_message}"
-        )
-
-    @property
-    def formatted_whatsapp(self):
-        return f"({self.whatsapp[:2]}) {self.whatsapp[2:7]}-{self.whatsapp[7:]}"
 
 
 class CellphoneAccessToken(BaseModel):
