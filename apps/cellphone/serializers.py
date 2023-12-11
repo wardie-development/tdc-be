@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from apps.cellphone.models import CellphoneAccess, CellphoneAccessToken, \
-    CellphoneSuggestion
+    CellphoneSuggestion, Cellphone
 
 
 class BrandSerializer(serializers.Serializer):
@@ -38,3 +38,8 @@ class CellphoneSuggestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CellphoneSuggestion
         fields = "__all__"
+
+
+class CellphoneSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        return instance.to_representation()

@@ -33,14 +33,7 @@ class Brand(BaseModel):
                 "title": f"Películas para {self.name}",
                 "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
                 "cellphones": [
-                    {
-                        "brand": self.name,
-                        "model": cellphone.model,
-                        "compatibilities": [
-                            compatibility.name
-                            for compatibility in cellphone.cellphone_screen_protector_compatibilities.all()
-                        ],
-                    }
+                    cellphone.to_representation()
                     for cellphone in self.cellphones.all()
                 ]
             }
@@ -66,6 +59,16 @@ class Cellphone(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def to_representation(self):
+        return {
+            "brand": self.brand.name,
+            "model": self.model,
+            "compatibilities": [
+                compatibility.name
+                for compatibility in self.cellphone_screen_protector_compatibilities.all()
+            ],
+        }
 
 
 class CellphoneWriter(BaseModel):
