@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from apps.cellphone.models import Brand
 from apps.cellphone.permissions import IsAuthenticated
 from apps.cellphone.serializers import BrandSerializer, \
-    CellphoneAuthenticationSerializer
+    CellphoneAuthenticationSerializer, CellphoneSuggestionsSerializer
 
 
 class BrandViewSet(viewsets.ReadOnlyModelViewSet):
@@ -26,3 +26,11 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         names = Brand.objects.values("name")
 
         return Response(names)
+
+    @action(detail=False, methods=["post"])
+    def suggestion(self, request):
+        serializer = CellphoneSuggestionsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Sugestão enviada com sucesso"})

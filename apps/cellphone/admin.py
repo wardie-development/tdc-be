@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from apps.cellphone.models import Brand, Cellphone, CellphoneWriter, CellphoneAccess
+from apps.cellphone.models import Brand, Cellphone, CellphoneWriter, CellphoneAccess, \
+    CellphoneSuggestion
 
 
 @admin.register(Brand)
@@ -54,3 +55,13 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
             access.save()
 
     renew_access.short_description = "Renovar acesso"
+
+
+@admin.register(CellphoneSuggestion)
+class CellphoneSuggestionAdmin(admin.ModelAdmin):
+    list_display = ["name", "whatsapp", "suggestion", "created_at", "is_active"]
+    search_fields = ["name", "whatsapp", "suggestion"]
+    fieldsets = (
+        ("Criar Sugestão", {"fields": ("name", "whatsapp", "suggestion")}),
+    )
+    readonly_fields = ["name", "whatsapp", "suggestion"]

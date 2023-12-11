@@ -62,7 +62,7 @@ class Cellphone(BaseModel):
 
     @property
     def name(self):
-        return f"{self.brand.name} {self.model}"
+        return self.model
 
     def __str__(self):
         return self.name
@@ -219,3 +219,16 @@ class CellphoneAccessToken(BaseModel):
         hours = 1
         is_expired = self.created_at + timedelta(hours=hours) < timezone.now()
         return is_expired
+
+
+class CellphoneSuggestion(BaseModel):
+    name = models.CharField(max_length=255, verbose_name="Nome")
+    whatsapp = models.CharField(max_length=255, verbose_name="Whatsapp")
+    suggestion = models.TextField(verbose_name="Sugestão")
+
+    class Meta:
+        verbose_name = "Sugestão"
+        verbose_name_plural = "Sugestões"
+
+    def __str__(self):
+        return f"Sugestão de {self.name}"

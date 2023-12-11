@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from apps.cellphone.models import CellphoneAccess, CellphoneAccessToken
+from apps.cellphone.models import CellphoneAccess, CellphoneAccessToken, \
+    CellphoneSuggestion
 
 
 class BrandSerializer(serializers.Serializer):
@@ -31,3 +32,9 @@ class CellphoneAuthenticationSerializer(serializers.Serializer):
         token = CellphoneAccessToken.objects.get_or_create(access=access)[0]
         token.renew_token_if_expired()
         return token
+
+
+class CellphoneSuggestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CellphoneSuggestion
+        fields = "__all__"

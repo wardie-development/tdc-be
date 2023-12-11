@@ -18,7 +18,4 @@ class IsAuthenticated(BasePermission):
         if not token:
             return False
 
-        if token.is_expired:
-            return False
-
         return True

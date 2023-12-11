@@ -12,3 +12,6 @@ superuser:
 
 install:
 	pip install -r requirements.txt
+
+initial_charge:
+	python manage.py initial_charge
