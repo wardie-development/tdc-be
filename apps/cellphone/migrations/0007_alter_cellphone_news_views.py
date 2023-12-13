@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cellphone', '0006_cellphone_news_views'),
+        ("cellphone", "0006_cellphone_news_views"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cellphone',
-            name='news_views',
-            field=models.ManyToManyField(blank=True, to='cellphone.cellphoneaccess', verbose_name='Visualizações de novidades'),
+            model_name="cellphone",
+            name="news_views",
+            field=models.ManyToManyField(
+                blank=True,
+                to="cellphone.cellphoneaccess",
+                verbose_name="Visualizações de novidades",
+            ),
         ),
     ]

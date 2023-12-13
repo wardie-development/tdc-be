@@ -5,25 +5,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cellphone', '0003_alter_cellphone_brand_and_more'),
+        ("cellphone", "0003_alter_cellphone_brand_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CellphoneAccessToken',
+            name="CellphoneAccessToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('token', models.CharField(max_length=255, verbose_name='Token')),
-                ('access', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tokens', to='cellphone.cellphoneaccess', verbose_name='Acesso')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("token", models.CharField(max_length=255, verbose_name="Token")),
+                (
+                    "access",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tokens",
+                        to="cellphone.cellphoneaccess",
+                        verbose_name="Acesso",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Token de acesso',
-                'verbose_name_plural': 'Tokens de acesso',
+                "verbose_name": "Token de acesso",
+                "verbose_name_plural": "Tokens de acesso",
             },
         ),
     ]

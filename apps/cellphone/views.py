@@ -8,8 +8,10 @@ from rest_framework.response import Response
 from apps.cellphone.models import Brand, Cellphone, CellphoneAccessToken
 from apps.cellphone.permissions import IsAuthenticated
 from apps.cellphone.serializers import (
-    BrandSerializer, CellphoneAuthenticationSerializer, CellphoneSuggestionsSerializer,
-    CellphoneSerializer
+    BrandSerializer,
+    CellphoneAuthenticationSerializer,
+    CellphoneSuggestionsSerializer,
+    CellphoneSerializer,
 )
 
 
@@ -47,9 +49,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             token=request.headers.get("Authorization")
         ).access
 
-        news = Cellphone.objects.filter(
-            created_at__gte=three_days_ago
-        ).exclude(
+        news = Cellphone.objects.filter(created_at__gte=three_days_ago).exclude(
             news_views__whatsapp=access
         )
 

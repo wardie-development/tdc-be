@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cellphone', '0005_cellphonesuggestion'),
+        ("cellphone", "0005_cellphonesuggestion"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cellphone',
-            name='news_views',
-            field=models.ManyToManyField(to='cellphone.cellphoneaccess', verbose_name='Visualizações de novidades'),
+            model_name="cellphone",
+            name="news_views",
+            field=models.ManyToManyField(
+                to="cellphone.cellphoneaccess",
+                verbose_name="Visualizações de novidades",
+            ),
         ),
     ]

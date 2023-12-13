@@ -5,20 +5,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cellphone', '0002_cellphoneaccess_alter_cellphonewriter_input'),
+        ("cellphone", "0002_cellphoneaccess_alter_cellphonewriter_input"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cellphone',
-            name='brand',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cellphones', to='cellphone.brand', verbose_name='Marca'),
+            model_name="cellphone",
+            name="brand",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="cellphones",
+                to="cellphone.brand",
+                verbose_name="Marca",
+            ),
         ),
         migrations.AlterField(
-            model_name='cellphoneaccess',
-            name='days_to_expire',
-            field=models.PositiveIntegerField(default=30, verbose_name='Dias para expirar'),
+            model_name="cellphoneaccess",
+            name="days_to_expire",
+            field=models.PositiveIntegerField(
+                default=30, verbose_name="Dias para expirar"
+            ),
         ),
     ]

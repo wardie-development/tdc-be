@@ -1,8 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from apps.cellphone.models import CellphoneAccess, CellphoneAccessToken, \
-    CellphoneSuggestion, Cellphone
+from apps.cellphone.models import (
+    CellphoneAccess,
+    CellphoneAccessToken,
+    CellphoneSuggestion,
+    Cellphone,
+)
 
 
 class BrandSerializer(serializers.Serializer):

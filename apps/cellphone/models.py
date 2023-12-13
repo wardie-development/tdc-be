@@ -25,27 +25,28 @@ class Brand(BaseModel):
         "Apple": "#414c65",
         "LG": "#1a9d68",
         "Asus": "#655241",
-        "Oppo": "#23998b"
+        "Oppo": "#23998b",
     }
 
     def to_representation(self):
         return {
-                "title": f"Películas para {self.name}",
-                "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
-                "cellphones": [
-                    cellphone.to_representation()
-                    for cellphone in self.cellphones.all()
-                ]
-            }
+            "title": f"Películas para {self.name}",
+            "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
+            "cellphones": [
+                cellphone.to_representation() for cellphone in self.cellphones.all()
+            ],
+        }
 
 
 class CellphoneAccess(BaseModel):
     whatsapp = models.CharField(max_length=255, verbose_name="Whatsapp")
-    password = models.CharField(max_length=255, verbose_name="Senha", null=True,
-                                blank=True)
+    password = models.CharField(
+        max_length=255, verbose_name="Senha", null=True, blank=True
+    )
     valid_until = models.DateTimeField(verbose_name="Válido até", null=True, blank=True)
-    days_to_expire = models.PositiveIntegerField(verbose_name="Dias para expirar",
-                                                 default=30)
+    days_to_expire = models.PositiveIntegerField(
+        verbose_name="Dias para expirar", default=30
+    )
 
     class Meta:
         verbose_name = "Acesso"
@@ -85,8 +86,7 @@ class CellphoneAccess(BaseModel):
     def whatsapp_message_link(self):
         whatsapp_link = "https://api.whatsapp.com/send"
         return (
-            f"{whatsapp_link}?phone=55{self.whatsapp}"
-            f"&text={self.whatsapp_message}"
+            f"{whatsapp_link}?phone=55{self.whatsapp}" f"&text={self.whatsapp_message}"
         )
 
     @property
@@ -95,14 +95,16 @@ class CellphoneAccess(BaseModel):
 
 
 class Cellphone(BaseModel):
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones")
+    brand = models.ForeignKey(
+        Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones"
+    )
     model = models.CharField(max_length=255, verbose_name="Modelo")
     cellphone_screen_protector_compatibilities = models.ManyToManyField(
-        "self",
-        verbose_name="Compatibilidades com películas",
-        blank=True
+        "self", verbose_name="Compatibilidades com películas", blank=True
     )
-    news_views = models.ManyToManyField(CellphoneAccess, verbose_name="Visualizações de novidades", blank=True)
+    news_views = models.ManyToManyField(
+        CellphoneAccess, verbose_name="Visualizações de novidades", blank=True
+    )
 
     class Meta:
         verbose_name = "Celular"
@@ -140,7 +142,7 @@ Caso a compatibilidade tenha a mesma marca, não é necessário incluir
 a marca na compatibilidade, desta forma: <br>
 <b>MarcaX</b> ModeloX: ModeloX - ModeloX - <b>MarcaY</b> ModeloY 
             """
-        )
+        ),
     )
 
     def update_cellphones(self):
@@ -148,10 +150,7 @@ a marca na compatibilidade, desta forma: <br>
             brand, model, compatibilities = self._parse_line(line)
 
             brand = Brand.objects.get_or_create(name=brand)[0]
-            cellphone = Cellphone.objects.get_or_create(
-                brand=brand,
-                model=model
-            )[0]
+            cellphone = Cellphone.objects.get_or_create(brand=brand, model=model)[0]
 
             cellphone.cellphone_screen_protector_compatibilities.set(compatibilities)
             cellphone.save()
@@ -182,8 +181,7 @@ a marca na compatibilidade, desta forma: <br>
             model = splitted_compatibility[1]
 
         return Cellphone.objects.get_or_create(
-            brand=Brand.objects.get_or_create(name=brand)[0],
-            model=model
+            brand=Brand.objects.get_or_create(name=brand)[0], model=model
         )[0]
 
     def save(self, *args, **kwargs):
@@ -199,7 +197,12 @@ a marca na compatibilidade, desta forma: <br>
 
 
 class CellphoneAccessToken(BaseModel):
-    access = models.ForeignKey(CellphoneAccess, on_delete=models.CASCADE, verbose_name="Acesso", related_name="tokens")
+    access = models.ForeignKey(
+        CellphoneAccess,
+        on_delete=models.CASCADE,
+        verbose_name="Acesso",
+        related_name="tokens",
+    )
     token = models.CharField(max_length=255, verbose_name="Token")
 
     class Meta:
