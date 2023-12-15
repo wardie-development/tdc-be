@@ -21,12 +21,22 @@ class CellphoneAdmin(admin.ModelAdmin):
     list_display = ["name", "created_at", "updated_at", "is_active"]
     search_fields = ["name"]
     filter_horizontal = ["cellphone_screen_protector_compatibilities"]
+    fields = [
+        "brand",
+        "model",
+        "cellphone_screen_protector_compatibilities",
+        "is_main",
+        "scheduled_to"
+    ]
 
 
 @admin.register(CellphoneWriter)
 class CellphoneWriterAdmin(admin.ModelAdmin):
     list_display = ["created_at", "updated_at", "is_active"]
     search_fields = ["input"]
+    fields = [
+        "input",
+    ]
 
 
 @admin.register(CellphoneAccess)

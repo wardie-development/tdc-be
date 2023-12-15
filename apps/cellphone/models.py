@@ -1,5 +1,6 @@
 import uuid
 from datetime import timedelta
+from typing import List
 
 from django.db import models
 from django.utils import timezone
@@ -33,7 +34,7 @@ class Brand(BaseModel):
             "title": f"Películas para {self.name}",
             "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
             "cellphones": [
-                cellphone.to_representation() for cellphone in self.cellphones.all()
+                cellphone.to_representation() for cellphone in self.cellphones.filter(is_main=True, scheduled_to__isnull=False, scheduled_to__lte=timezone.now())
             ],
         }
 
@@ -105,11 +106,16 @@ class Cellphone(BaseModel):
     news_views = models.ManyToManyField(
         CellphoneAccess, verbose_name="Visualizações de novidades", blank=True
     )
+    scheduled_to = models.DateField(
+        verbose_name="Agendado para", null=True, blank=True
+    )
+    is_main = models.BooleanField(verbose_name="É principal?", default=False)
 
     class Meta:
         verbose_name = "Celular"
         verbose_name_plural = "Celulares"
         ordering = ["model"]
+        unique_together = ["brand", "model"]
 
     @property
     def name(self):
@@ -130,55 +136,92 @@ class Cellphone(BaseModel):
 
 
 class CellphoneWriter(BaseModel):
+    UPDATE_STRING = "ATUALIZAR"
+    ADD_STRING = "ADICIONAR"
+    REMOVE_STRING = "REMOVER"
+
     input = models.TextField(
         verbose_name="Entrada",
         help_text=(
-            """
-Escreva aqui no seguinte formato: <br>
-<b>Marca Modelo</b>: Marca Modelo - Marca Modelo - Marca Modelo <br>
-<b>Marca Modelo</b>: Marca Modelo - Marca Modelo - Marca Modelo <br>
-<br><br>
-Caso a compatibilidade tenha a mesma marca, não é necessário incluir 
-a marca na compatibilidade, desta forma: <br>
-<b>MarcaX</b> ModeloX: ModeloX - ModeloX - <b>MarcaY</b> ModeloY 
+            f"""
+Siga rigorosamente este formato: <br>
+<br>
+{UPDATE_STRING}:
+
+<br>
+Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3<br>
+Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3<br>
+
+<br>
+
+{ADD_STRING}:
+
+<br>
+Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3<br>
+Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3<br>
+
+<br>
+
+{REMOVE_STRING}:
+
+<br>
+Marca Modelo<br>
+Marca Modelo<br>
+
+<br>
+
+<hr class="solid">
+
+Opcionalmente, você pode colocar no final de cada linha de ação, uma data que queira que seja publicada aquele celular, Exemplo: <br>
+
+<br>
+
+Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3 [dd/mm/YYYY]<br>
             """
         ),
     )
 
     def update_cellphones(self):
-        for line in self.input.splitlines():
-            brand, model, compatibilities = self._parse_line(line)
+        actions = self._get_actions()
 
-            brand = Brand.objects.get_or_create(name=brand)[0]
-            cellphone = Cellphone.objects.get_or_create(brand=brand, model=model)[0]
-
-            cellphone.cellphone_screen_protector_compatibilities.set(compatibilities)
-            cellphone.save()
-
-        self.delete()
+        for action, cellphones in actions.items():
+            formatted_action = action.replace(":", "")
+            if formatted_action == self.UPDATE_STRING:
+                self._update_cellphones(cellphones)
+            elif formatted_action == self.ADD_STRING:
+                self._add_cellphones(cellphones)
+            elif formatted_action == self.REMOVE_STRING:
+                self._remove_cellphones(cellphones)
 
     def _parse_line(self, line):
         brand_model, compatibilities = line.split(":")
-        brand, model = brand_model.split()
+        main_cellphone = brand_model.split()
+        brand = main_cellphone[0]
+        date = line[-12:]
+        has_schedule = date[0] == "[" and date[-1] == "]"
+
+        scheduled_to = timezone.now()
+        model = " ".join(main_cellphone[1:])
+        if has_schedule:
+            compatibilities = compatibilities.replace(date, "")
+            date = date.replace("[", "").replace("]", "")
+            day, month, year = date.split("/")
+            scheduled_to = f"{year}-{month}-{day}"
 
         compatibilities = compatibilities.split(" - ")
 
         compatibilities = [
-            self._make_cellphone(brand, compatibility)
+            self._make_cellphone(compatibility)
             for compatibility in compatibilities
         ]
 
-        return brand, model, compatibilities
+        return brand, model, compatibilities, scheduled_to
 
     @staticmethod
-    def _make_cellphone(cellphone_brand, compatibility):
+    def _make_cellphone(compatibility):
         splitted_compatibility = compatibility.split()
-        brand = cellphone_brand
-        model = splitted_compatibility[0]
-
-        if len(splitted_compatibility) == 2:
-            brand = splitted_compatibility[0]
-            model = splitted_compatibility[1]
+        brand = splitted_compatibility[0]
+        model = " ".join(splitted_compatibility[1:])
 
         return Cellphone.objects.get_or_create(
             brand=Brand.objects.get_or_create(name=brand)[0], model=model
@@ -187,6 +230,7 @@ a marca na compatibilidade, desta forma: <br>
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.update_cellphones()
+        self.delete()
 
     class Meta:
         verbose_name = "Cadastrador de celulares"
@@ -194,6 +238,59 @@ a marca na compatibilidade, desta forma: <br>
 
     def __str__(self):
         return "Cadastrador de celulares"
+
+    def _get_actions(self):
+        lines = [
+            line for line in self.input.splitlines()
+            if line != ""
+        ]
+
+        cellphones = {
+            f"{self.UPDATE_STRING}:": [],
+            f"{self.ADD_STRING}:": [],
+            f"{self.REMOVE_STRING}:": [],
+        }
+
+        actions = list(cellphones.keys())
+        action = actions[0]
+
+        for line in lines:
+            if line in actions:
+                action = line
+            else:
+                cellphones[action].append(line.replace("<br>", ""))
+
+        return cellphones
+
+    def _update_cellphones(self, cellphones: List[str]):
+        for line in cellphones:
+            brand, model, compatibilities, scheduled_to = self._parse_line(line)
+
+            cellphone = Cellphone.objects.get_or_create(brand__name=brand, model=model)[0]
+            cellphone.scheduled_to = scheduled_to
+            cellphone.save()
+            cellphone.cellphone_screen_protector_compatibilities.set(compatibilities)
+
+    def _add_cellphones(self, cellphones):
+        for line in cellphones:
+            brand, model, compatibilities, scheduled_to = self._parse_line(line)
+            cellphone = Cellphone.objects.get_or_create(
+                brand=Brand.objects.get_or_create(name=brand)[0],
+                model=model
+            )[0]
+
+            cellphone.scheduled_to = scheduled_to
+            cellphone.is_main = True
+            cellphone.save()
+            cellphone.cellphone_screen_protector_compatibilities.add(*compatibilities)
+
+    def _remove_cellphones(self, cellphones):
+        for line in cellphones:
+            splitted_line = line.split()
+            brand = splitted_line[0]
+            model = " ".join(splitted_line[1:])
+            cellphone = Cellphone.objects.get(brand__name=brand, model=model)
+            cellphone.delete()
 
 
 class CellphoneAccessToken(BaseModel):

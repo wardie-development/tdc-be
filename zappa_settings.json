@@ -9,8 +9,6 @@
         "cors_origin": "*",
         "cors_headers": "*",
         "cors_methods": ["GET", "POST", "PUT", "DELETE"],
-        "s3_bucket": "zappa-zvcaajplp",
-        "certificate_arn": "arn:aws:acm:us-east-1:479122128839:certificate/2f7c4aa4-3f74-46fc-b513-7e8063842c18",
-        "domain": "admin.tecnicosdecelular.com.br"
+        "s3_bucket": "zappa-zvcaajplp"
     }
 }
