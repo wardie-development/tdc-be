@@ -60,13 +60,19 @@ class Brand(BaseModel):
 
 
 class CellphoneAccess(BaseModel):
+    client = models.CharField(max_length=255, verbose_name="Cliente", null=True, blank=True)
     whatsapp = models.CharField(max_length=255, verbose_name="Whatsapp")
     password = models.CharField(
         max_length=255, verbose_name="Senha", null=True, blank=True
     )
     valid_until = models.DateTimeField(verbose_name="Válido até", null=True, blank=True)
-    days_to_expire = models.PositiveIntegerField(
-        verbose_name="Dias para expirar", default=30
+    days_to_expire = models.CharField(
+        verbose_name="Dias para expirar", max_length=255, choices=[
+            ("3", "3 dia"),
+            ("30", "30 dias"),
+            ("90", "90 dias"),
+            ("180", "180 dias"),
+        ]
     )
 
     class Meta:
@@ -92,7 +98,7 @@ Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%
         super().save(*args, **kwargs)
 
     def renew_access(self):
-        self.valid_until = timezone.now() + timedelta(days=self.days_to_expire)
+        self.valid_until = timezone.now() + timedelta(days=int(self.days_to_expire))
         if self.password is None:
             self.password = User.objects.make_random_password(length=6).lower()
 
@@ -105,10 +111,6 @@ Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%
         return (
             f"{whatsapp_link}?phone=55{self.whatsapp}" f"&text={self.whatsapp_message}"
         )
-
-    @property
-    def formatted_whatsapp(self):
-        return f"({self.whatsapp[:2]}) {self.whatsapp[2:7]}-{self.whatsapp[7:]}"
 
 
 class Cellphone(BaseModel):
