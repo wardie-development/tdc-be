@@ -18,7 +18,7 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Cellphone)
 class CellphoneAdmin(admin.ModelAdmin):
-    list_display = ["name", "created_at", "updated_at", "is_active"]
+    list_display = ["brand_name", "model", "created_at", "is_active", "is_visible"]
     search_fields = ["model", "brand__name", "cellphone_screen_protector_compatibilities__model"]
     filter_horizontal = ["cellphone_screen_protector_compatibilities"]
     fields = [
@@ -28,6 +28,13 @@ class CellphoneAdmin(admin.ModelAdmin):
         "is_main",
         "scheduled_to"
     ]
+    list_display_links = ["brand_name", "model"]
+    list_per_page = 10
+    list_filter = ["is_main", "is_active", "brand__name", "scheduled_to"]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("brand")
 
 
 @admin.register(CellphoneWriter)

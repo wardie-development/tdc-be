@@ -137,6 +137,15 @@ class Cellphone(BaseModel):
     def name(self):
         return self.model
 
+    @property
+    def brand_name(self):
+        return self.brand.name
+
+    @property
+    def is_visible(self):
+        _is_visible = self.scheduled_to is None or self.scheduled_to <= timezone.localdate()
+        return "Visível" if _is_visible else f"Visível a partir de {self.scheduled_to.strftime('%d/%m/%Y')}"
+
     def __str__(self):
         return self.name
 
