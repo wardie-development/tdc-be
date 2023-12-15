@@ -19,7 +19,7 @@ class BrandAdmin(admin.ModelAdmin):
 @admin.register(Cellphone)
 class CellphoneAdmin(admin.ModelAdmin):
     list_display = ["name", "created_at", "updated_at", "is_active"]
-    search_fields = ["name"]
+    search_fields = ["model", "brand__name", "cellphone_screen_protector_compatibilities__model"]
     filter_horizontal = ["cellphone_screen_protector_compatibilities"]
     fields = [
         "brand",

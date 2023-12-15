@@ -2,6 +2,7 @@ import uuid
 from datetime import timedelta
 from typing import List
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -199,17 +200,20 @@ Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3 [dd/mm/YYYY]<br>
         ),
     )
 
-    def update_cellphones(self):
-        actions = self._get_actions()
+    def clean(self):
+        try:
+            actions = self._get_actions()
 
-        for action, cellphones in actions.items():
-            formatted_action = action.replace(":", "")
-            if formatted_action == self.UPDATE_STRING:
-                self._update_cellphones(cellphones)
-            elif formatted_action == self.ADD_STRING:
-                self._add_cellphones(cellphones)
-            elif formatted_action == self.REMOVE_STRING:
-                self._remove_cellphones(cellphones)
+            for action, cellphones in actions.items():
+                formatted_action = action.replace(":", "")
+                if formatted_action == self.UPDATE_STRING:
+                    self._update_cellphones(cellphones)
+                elif formatted_action == self.ADD_STRING:
+                    self._add_cellphones(cellphones)
+                elif formatted_action == self.REMOVE_STRING:
+                    self._remove_cellphones(cellphones)
+        except Exception as e:
+            raise ValidationError("Verifique se o formato está correto")
 
     def _parse_line(self, line):
         brand_model, compatibilities = line.split(":")
@@ -247,7 +251,6 @@ Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3 [dd/mm/YYYY]<br>
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.update_cellphones()
         self.delete()
 
     class Meta:
