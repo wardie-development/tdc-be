@@ -49,7 +49,10 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             token=request.headers.get("Authorization")
         ).access
 
-        news = Cellphone.objects.filter(created_at__gte=three_days_ago).exclude(
+        news = Cellphone.objects.filter(
+            created_at__gte=three_days_ago,
+            is_main=True,
+        ).exclude(
             news_views__whatsapp=access
         )
 
