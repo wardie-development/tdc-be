@@ -11,6 +11,8 @@ from apps.user.models import User
 
 class Brand(BaseModel):
     name = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(verbose_name="Ordem", default=0, null=True,
+                                        blank=True)
 
     class Meta:
         verbose_name = "Marca"
@@ -29,12 +31,29 @@ class Brand(BaseModel):
         "Oppo": "#23998b",
     }
 
-    def to_representation(self):
+    @classmethod
+    def to_representation(cls, instance):
         return {
-            "title": f"Películas para {self.name}",
-            "color": self.mapped_colors.get(self.name) or self.mapped_colors["Samsung"],
+            "title": f"Películas para {instance.name}",
+            "color": instance.mapped_colors.get(instance.name,
+                                                instance.mapped_colors["Samsung"]),
             "cellphones": [
-                cellphone.to_representation() for cellphone in self.cellphones.filter(is_main=True, scheduled_to__isnull=False, scheduled_to__lte=timezone.now())
+                {
+                    "brand": cellphone.brand.name,
+                    "model": cellphone.model,
+                    "compatibilities": [
+                        compatibility.name if compatibility.brand.name == cellphone.brand.name
+                        else f"{compatibility.brand.name} {compatibility.model}"
+                        for compatibility in
+                        cellphone.cellphone_screen_protector_compatibilities.only(
+                            "brand__name", "model").select_related("brand")
+                    ],
+                }
+                for cellphone in instance.cellphones.filter(
+                    is_main=True,
+                    scheduled_to__isnull=False,
+                    scheduled_to__lte=timezone.now(),
+                ).select_related('brand')
             ],
         }
 
@@ -58,17 +77,13 @@ class CellphoneAccess(BaseModel):
 
     @property
     def whatsapp_message(self):
+        whatsapp_line_break = "%0a"
         return f"""
-        _Agora você é um(a) Cliente PLUS da TDC!_
-
-        A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*
-
-        Link de acesso:
-        https://app.tecnicosdecelular.com.br/tabela-plus/
-
-        Sua senha é valida até:
-        *{self.valid_until.strftime("%d/%m/%Y")} às {self.valid_until.strftime("%H:%M")}h*
-        """
+_Agora você é um(a) Cliente PLUS da TDC!_{whatsapp_line_break}{whatsapp_line_break}
+A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}
+Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}
+Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%m/%Y às %H:%M")}h*
+            """
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -97,11 +112,11 @@ class CellphoneAccess(BaseModel):
 
 class Cellphone(BaseModel):
     brand = models.ForeignKey(
-        Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones"
+        Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones", db_index=True
     )
     model = models.CharField(max_length=255, verbose_name="Modelo")
     cellphone_screen_protector_compatibilities = models.ManyToManyField(
-        "self", verbose_name="Compatibilidades com películas", blank=True
+        "self", verbose_name="Compatibilidades com películas", blank=True, db_index=True
     )
     news_views = models.ManyToManyField(
         CellphoneAccess, verbose_name="Visualizações de novidades", blank=True
@@ -130,7 +145,10 @@ class Cellphone(BaseModel):
             "model": self.model,
             "compatibilities": [
                 compatibility.name if compatibility.brand.name == self.brand.name else f"{compatibility.brand.name} {compatibility.model}"
-                for compatibility in self.cellphone_screen_protector_compatibilities.all()
+                for compatibility in
+                self.cellphone_screen_protector_compatibilities.only("brand__name",
+                                                                     "model").select_related(
+                    "brand").iterator()
             ],
         }
 
@@ -266,7 +284,8 @@ Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3 [dd/mm/YYYY]<br>
         for line in cellphones:
             brand, model, compatibilities, scheduled_to = self._parse_line(line)
 
-            cellphone = Cellphone.objects.get_or_create(brand__name=brand, model=model)[0]
+            cellphone = Cellphone.objects.get_or_create(brand__name=brand, model=model)[
+                0]
             cellphone.scheduled_to = scheduled_to
             cellphone.save()
             cellphone.cellphone_screen_protector_compatibilities.set(compatibilities)

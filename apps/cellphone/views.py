@@ -16,7 +16,7 @@ from apps.cellphone.serializers import (
 
 
 class BrandViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Brand.objects.all()
+    queryset = Brand.objects.filter(is_active=True).order_by("order")
     serializer_class = BrandSerializer
     permission_classes = [IsAuthenticated]
 
@@ -30,7 +30,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="name")
     def list_name(self, request):
-        names = Brand.objects.values("name")
+        names = Brand.objects.only("name", "is_active", "order").filter(is_active=True).order_by("order").values("name")
 
         return Response(names)
 
