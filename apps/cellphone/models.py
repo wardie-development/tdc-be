@@ -129,7 +129,7 @@ class Cellphone(BaseModel):
             "brand": self.brand.name,
             "model": self.model,
             "compatibilities": [
-                compatibility.name
+                compatibility.name if compatibility.brand.name == self.brand.name else f"{compatibility.brand.name} {compatibility.model}"
                 for compatibility in self.cellphone_screen_protector_compatibilities.all()
             ],
         }
