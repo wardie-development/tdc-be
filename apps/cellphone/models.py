@@ -68,11 +68,12 @@ class CellphoneAccess(BaseModel):
     valid_until = models.DateTimeField(verbose_name="Válido até", null=True, blank=True)
     days_to_expire = models.CharField(
         verbose_name="Dias para expirar", max_length=255, choices=[
-            ("3", "3 dia"),
+            ("3", "3 dias"),
             ("30", "30 dias"),
             ("90", "90 dias"),
             ("180", "180 dias"),
-        ]
+        ],
+        default="3"
     )
 
     class Meta:
