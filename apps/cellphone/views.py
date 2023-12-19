@@ -50,8 +50,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         ).access
 
         news = Cellphone.objects.filter(
-            created_at__gte=three_days_ago,
-            is_main=True,
+            created_at__gte=three_days_ago
         ).exclude(
             news_views__whatsapp=access
         )

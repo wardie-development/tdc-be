@@ -110,7 +110,6 @@ class Cellphone(BaseModel):
         verbose_name = "Celular"
         verbose_name_plural = "Celulares"
         ordering = ["model"]
-        unique_together = ["brand", "model"]
 
     @property
     def name(self):
