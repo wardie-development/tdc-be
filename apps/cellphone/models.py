@@ -71,7 +71,6 @@ Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%
             """
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         self.renew_access()
         super().save(*args, **kwargs)
 

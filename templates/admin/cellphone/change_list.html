@@ -1,0 +1,43 @@
+{% extends "admin/change_list.html" %}
+
+{% block search %}
+    <style>
+        .formRegisterTesteAccess {
+            background: #23a455;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .formRegisterTesteAccess__textInput {
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+            margin-right: 8px;
+        }
+        .formRegisterTesteAccess__button {
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            background: #23a455 !important;
+            color: #fff;
+            cursor: pointer;
+        }
+        .formRegisterTesteAccess__button:hover {
+            background: #1e8e4b !important;
+        }
+    </style>
+    <div style="margin-bottom: 2px; display: flex; align-items: center; background: #3ec573; border-block: 1px solid #23a455; padding: 5px;">
+        <form action="{% url 'admin:create-test-access' %}" method="post" class="formRegisterTesteAccess">
+            <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/whatsapp-white-icon.png" alt="wpp" width="25" style="margin-right: 5px"/>
+            {% csrf_token %}
+            <input type="text" name="whatsapp_number" class="formRegisterTesteAccess__textInput" placeholder="Número do WhatsApp" value="{{ request.POST.whatsapp_number }}">
+            <button type="submit" class="formRegisterTesteAccess__button" id="formRegisterTesteAccess__button">
+                Cadastrar acesso de teste
+            </button>
+        </form>
+    </div>
+    {{ block.super }}
+{% endblock %}

@@ -1,4 +1,8 @@
 from django.contrib import admin
+from django import forms
+from django.http import HttpResponseRedirect
+from django.urls import path
+from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 from apps.cellphone.models import (
@@ -14,6 +18,10 @@ from apps.cellphone.models import (
 class BrandAdmin(admin.ModelAdmin):
     list_display = ["name", "created_at", "updated_at", "is_active"]
     search_fields = ["name"]
+
+
+class CreateAccessForm(forms.ModelForm):
+    whatsapp = forms.CharField(label='Whatsapp')
 
 
 @admin.register(Cellphone)
@@ -74,6 +82,7 @@ class CellphoneAccessLogInline(admin.TabularInline):
 
 @admin.register(CellphoneAccess)
 class CellphoneAccessAdmin(admin.ModelAdmin):
+    change_list_template = "admin/cellphone/change_list.html"
     list_display = [
         "client",
         "password",
@@ -94,11 +103,39 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
     list_per_page = 10
     inlines = [CellphoneAccessLogInline]
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('create-test-access/', self.admin_site.admin_view(self.create_test_access), name='create-test-access'),
+        ]
+        return custom_urls + urls
+
+    @staticmethod
+    def create_test_access(request):
+        if request.method == 'POST':
+
+            data = request.POST
+            whatsapp = data.get('whatsapp_number')
+
+            if whatsapp:
+                access = CellphoneAccess.objects.create(
+                    client=f"Cliente - {whatsapp}",
+                    whatsapp=whatsapp,
+                    is_test_access=True,
+                    days_to_expire="3"
+                )
+                access.save()
+
+                messages.success(request, f'Acesso de teste criado com sucesso: {whatsapp} {access.password}')
+
+                return HttpResponseRedirect(access.whatsapp_message_link)
+
+        return HttpResponseRedirect("../")
+
     @staticmethod
     def send_whatsapp_message(access):
         whatsapp_link = access.whatsapp_message_link
         send_message_icon = "https://beeluvd.eu/wp-content/uploads/2014/09/send-icon-white.png"
-        whatsapp_icon = "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/whatsapp-white-icon.png"
         button_style = "display: inline-block; background-color: #23a455; color: #fff; padding-inline: 10px; padding-block: 5px; border-radius: 5px; text-decoration: none; margin-inline: 10px;"
         return mark_safe(
             f"""
@@ -106,18 +143,10 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
                 <a
                     style="{button_style}"
                     target="_blank"
-                    href="https://api.whatsapp.com/send?phone=55{access.whatsapp}"
-                >
-                    <img src="{whatsapp_icon}" width=15/>
-                    Chamar
-                </a>
-                <a
-                    style="{button_style}"
-                    target="_blank"
                     href="{whatsapp_link}"
                 >
                     <img src="{send_message_icon}" width=15/>
-                    Enviar
+                    Enviar Acesso
                 </a>
             </div>
             """
