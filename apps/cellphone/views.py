@@ -42,12 +42,19 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             user_agent = request.META.get("HTTP_USER_AGENT")
             access = token.access
 
-            CellphoneAccessLog.objects.get_or_create(
+            if access.logs.count() >= access.access_limit:
+                return Response(
+                    {"message": "Limite de acessos atingido"},
+                    status=403
+                )
+
+            access_log = CellphoneAccessLog.objects.get_or_create(
                 access=access,
                 ip=ip,
                 user_agent=user_agent,
-                token=token.token,
-            )
+            )[0]
+            access_log.token = token
+            access_log.save()
 
             return Response({"token": token.token})
         else:

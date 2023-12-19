@@ -52,6 +52,14 @@ class CellphoneAccess(BaseModel):
     is_test_access = models.BooleanField(
         verbose_name="É acesso de teste?", default=True
     )
+    access_limit = models.PositiveIntegerField(
+        verbose_name="Limite de acessos", default=5, help_text=(
+            """
+Limite de acessos atrelados aos IPs. <br>
+Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
+            """
+        )
+    )
 
     class Meta:
         verbose_name = "Acesso"
