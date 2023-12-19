@@ -18,7 +18,7 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Cellphone)
 class CellphoneAdmin(admin.ModelAdmin):
-    list_display = ["brand_name", "model", "compatibility_line", "created_at", "is_visible_for_test", "is_active", "is_visible"]
+    list_display = ["brand_name", "model", "compatibility_line", "is_visible_for_test", "is_active"]
     search_fields = ["model", "brand__name", "compatibility_line"]
     fields = [
         "brand",
@@ -30,10 +30,21 @@ class CellphoneAdmin(admin.ModelAdmin):
     list_display_links = ["brand_name", "model"]
     list_per_page = 10
     list_filter = ["is_active", "brand__name", "scheduled_to", "is_visible_for_test"]
+    actions = ["make_visible_for_test", "make_invisible_for_test"]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.select_related("brand")
+
+    def make_visible_for_test(self, _request, queryset):
+        queryset.update(is_visible_for_test=True)
+
+    make_visible_for_test.short_description = "Tornar visível para teste"
+
+    def make_invisible_for_test(self, _request, queryset):
+        queryset.update(is_visible_for_test=False)
+
+    make_invisible_for_test.short_description = "Tornar invisível para teste"
 
 
 @admin.register(CellphoneWriter)
