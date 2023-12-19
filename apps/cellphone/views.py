@@ -56,7 +56,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
                 user_agent=request.META.get("HTTP_USER_AGENT"),
                 password_tryed=request.data.get("password"),
             )
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=400)
 
     @action(detail=False, methods=["get"], url_path="name")
     def list_name(self, request):
