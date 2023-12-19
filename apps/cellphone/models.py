@@ -47,7 +47,7 @@ class CellphoneAccess(BaseModel):
             ("90", "90 dias"),
             ("180", "180 dias"),
         ],
-        default="3"
+        default="30"
     )
     is_test_access = models.BooleanField(
         verbose_name="É acesso de teste?", default=False
