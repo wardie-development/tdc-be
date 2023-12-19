@@ -5,7 +5,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.cellphone.models import Brand, Cellphone, CellphoneAccessToken
+from apps.cellphone.models import Brand, Cellphone, CellphoneAccessToken, \
+    CellphoneAccessLog, CellphoneAccessTry
 from apps.cellphone.permissions import IsAuthenticated
 from apps.cellphone.serializers import (
     BrandSerializer,
@@ -34,10 +35,28 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["post"])
     def authenticate(self, request):
         serializer = CellphoneAuthenticationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        token = serializer.save()
+        if serializer.is_valid():
+            token = serializer.save()
 
-        return Response({"token": token.token})
+            ip = request.META.get("REMOTE_ADDR")
+            user_agent = request.META.get("HTTP_USER_AGENT")
+            access = token.access
+
+            CellphoneAccessLog.objects.get_or_create(
+                access=access,
+                ip=ip,
+                user_agent=user_agent,
+                token=token.token,
+            )
+
+            return Response({"token": token.token})
+        else:
+            CellphoneAccessTry.objects.create(
+                ip=request.META.get("REMOTE_ADDR"),
+                user_agent=request.META.get("HTTP_USER_AGENT"),
+                password_tryed=request.data.get("password"),
+            )
+            return Response(serializer.errors)
 
     @action(detail=False, methods=["get"], url_path="name")
     def list_name(self, request):

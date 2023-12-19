@@ -6,7 +6,7 @@ from apps.cellphone.models import (
     Cellphone,
     CellphoneWriter,
     CellphoneAccess,
-    CellphoneSuggestion,
+    CellphoneSuggestion, CellphoneAccessLog, CellphoneAccessTry,
 )
 
 
@@ -56,6 +56,22 @@ class CellphoneWriterAdmin(admin.ModelAdmin):
     ]
 
 
+class CellphoneAccessLogInline(admin.TabularInline):
+    model = CellphoneAccessLog
+    extra = 0
+    readonly_fields = ["ip", "user_agent", "token", "created_at"]
+    fields = ["ip", "user_agent", "token", "created_at"]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(CellphoneAccess)
 class CellphoneAccessAdmin(admin.ModelAdmin):
     list_display = [
@@ -76,6 +92,7 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
     list_display_links = ["client", "password"]
     list_filter = ["days_to_expire", "created_at", "valid_until", "is_test_access"]
     list_per_page = 10
+    inlines = [CellphoneAccessLogInline]
 
     @staticmethod
     def send_whatsapp_message(access):
@@ -164,3 +181,12 @@ class CellphoneSuggestionAdmin(admin.ModelAdmin):
     search_fields = ["name", "whatsapp", "suggestion"]
     fieldsets = (("Criar Sugestão", {"fields": ("name", "whatsapp", "suggestion")}),)
     readonly_fields = ["name", "whatsapp", "suggestion"]
+
+
+@admin.register(CellphoneAccessTry)
+class CellphoneAccessTryAdmin(admin.ModelAdmin):
+    list_display = ["ip", "user_agent", "password_tryed", "created_at"]
+    search_fields = ["ip", "user_agent", "password_tryed"]
+    readonly_fields = ["ip", "user_agent", "password_tryed", "created_at"]
+    list_filter = ["created_at"]
+    list_per_page = 10

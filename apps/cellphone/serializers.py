@@ -52,7 +52,7 @@ class CellphoneAuthenticationSerializer(serializers.Serializer):
     def validate(self, attrs):
         password = attrs.get("password")
 
-        access = get_object_or_404(CellphoneAccess, password=password)
+        access = CellphoneAccess.objects.filter(password=password).first()
 
         if not access:
             raise serializers.ValidationError("Senha incorreta")

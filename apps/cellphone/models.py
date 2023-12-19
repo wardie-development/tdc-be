@@ -91,6 +91,38 @@ Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%
         )
 
 
+class CellphoneAccessLog(BaseModel):
+    access = models.ForeignKey(
+        CellphoneAccess,
+        on_delete=models.CASCADE,
+        verbose_name="Acesso",
+        related_name="logs",
+    )
+    ip = models.CharField(max_length=255, verbose_name="IP")
+    user_agent = models.TextField(verbose_name="Agente")
+    token = models.CharField(max_length=255, verbose_name="Token", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Log de acesso"
+        verbose_name_plural = "Logs de acesso"
+
+    def __str__(self):
+        return str(self.access)
+
+
+class CellphoneAccessTry(BaseModel):
+    password_tryed = models.CharField(max_length=255, verbose_name="Senha tentada")
+    ip = models.CharField(max_length=255, verbose_name="IP")
+    user_agent = models.TextField(verbose_name="Agente")
+
+    class Meta:
+        verbose_name = "Tentativa de acesso negada"
+        verbose_name_plural = "Tentativas de acesso negadas"
+
+    def __str__(self):
+        return self.password_tryed
+
+
 class Cellphone(BaseModel):
     brand = models.ForeignKey(
         Brand, on_delete=models.CASCADE, verbose_name="Marca", related_name="cellphones", db_index=True
