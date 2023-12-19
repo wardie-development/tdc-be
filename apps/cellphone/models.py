@@ -50,7 +50,7 @@ class CellphoneAccess(BaseModel):
         default="3"
     )
     is_test_access = models.BooleanField(
-        verbose_name="É acesso de teste?", default=True
+        verbose_name="É acesso de teste?", default=False
     )
     access_limit = models.PositiveIntegerField(
         verbose_name="Limite de acessos", default=5, help_text=(
