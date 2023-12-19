@@ -19,19 +19,13 @@ class BrandSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         queryset = (
-            Cellphone.objects.filter(is_main=True, brand=instance).prefetch_related(
-                "cellphone_screen_protector_compatibilities",
-                "cellphone_screen_protector_compatibilities__brand",
-            ).only("model", "cellphone_screen_protector_compatibilities__model")
+            Cellphone.objects.filter(brand=instance).only("model", "compatibility_line")
         )
         cellphones = [
             {
                 "brand": instance.name,
                 "model": item.model,
-                "compatibilities": [
-                    compatibility.name if compatibility.brand.name == instance.name else f"{compatibility.brand.name} {compatibility.model}"
-                    for compatibility in item.cellphone_screen_protector_compatibilities.all()
-                ],
+                "compatibilities": item.compatibility_line,
             }
             for item in queryset
         ]

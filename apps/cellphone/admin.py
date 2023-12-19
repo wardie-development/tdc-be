@@ -18,19 +18,18 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Cellphone)
 class CellphoneAdmin(admin.ModelAdmin):
-    list_display = ["brand_name", "model", "created_at", "is_active", "is_visible"]
-    search_fields = ["model", "brand__name", "cellphone_screen_protector_compatibilities__model"]
-    filter_horizontal = ["cellphone_screen_protector_compatibilities"]
+    list_display = ["brand_name", "model", "compatibility_line", "created_at", "is_visible_for_test", "is_active", "is_visible"]
+    search_fields = ["model", "brand__name", "compatibility_line"]
     fields = [
         "brand",
         "model",
-        "cellphone_screen_protector_compatibilities",
-        "is_main",
+        "compatibility_line",
+        "is_visible_for_test",
         "scheduled_to"
     ]
     list_display_links = ["brand_name", "model"]
     list_per_page = 10
-    list_filter = ["is_main", "is_active", "brand__name", "scheduled_to"]
+    list_filter = ["is_active", "brand__name", "scheduled_to", "is_visible_for_test"]
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
