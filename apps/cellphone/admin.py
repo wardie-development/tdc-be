@@ -53,16 +53,17 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
         "send_whatsapp_message",
         "valid_until",
         "status",
+        "is_test_access",
         "edit",
         "delete"
     ]
     search_fields = ["whatsapp", "client", "password"]
     fieldsets = (
-        ("Criar Acesso", {"fields": ("client", "whatsapp", "days_to_expire", "password", "valid_until")}),
+        ("Criar Acesso", {"fields": ("client", "whatsapp", "days_to_expire", "is_test_access", "password", "valid_until")}),
     )
     actions = ["renew_access"]
     list_display_links = ["client", "password"]
-    list_filter = ["days_to_expire", "created_at", "valid_until"]
+    list_filter = ["days_to_expire", "created_at", "valid_until", "is_test_access"]
     list_per_page = 10
 
     @staticmethod

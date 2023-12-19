@@ -49,6 +49,9 @@ class CellphoneAccess(BaseModel):
         ],
         default="3"
     )
+    is_test_access = models.BooleanField(
+        verbose_name="É acesso de teste?", default=True
+    )
 
     class Meta:
         verbose_name = "Acesso"

@@ -18,9 +18,18 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = ["name"]
 
     def to_representation(self, instance):
+        request = self.context["request"]
+        access = CellphoneAccessToken.objects.get(
+            token=request.headers.get("Authorization")
+        ).access
+
         queryset = (
             Cellphone.objects.filter(brand=instance).only("model", "compatibility_line")
         )
+
+        if access.is_test_access:
+            queryset = queryset.filter(is_visible_for_test=True)
+
         cellphones = [
             {
                 "brand": instance.name,

@@ -20,6 +20,17 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        access = CellphoneAccessToken.objects.get(
+            token=self.request.headers.get("Authorization")
+        ).access
+
+        if access.is_test_access:
+            queryset = queryset.filter(cellphones__is_visible_for_test=True)
+
+        return queryset
+
     @action(detail=False, methods=["post"])
     def authenticate(self, request):
         serializer = CellphoneAuthenticationSerializer(data=request.data)
@@ -30,7 +41,13 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="name")
     def list_name(self, request):
+        access = CellphoneAccessToken.objects.get(
+            token=request.headers.get("Authorization")
+        ).access
         names = Brand.objects.only("name", "is_active", "order").filter(is_active=True).order_by("order").values("name")
+
+        if access.is_test_access:
+            names = names.filter(cellphones__is_visible_for_test=True)
 
         return Response(names)
 
@@ -54,6 +71,9 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         ).exclude(
             news_views__whatsapp=access
         )
+
+        if access.is_test_access:
+            news = news.filter(is_visible_for_test=True)
 
         data = CellphoneSerializer(news, many=True, context={"access": access}).data
 
