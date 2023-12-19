@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django import forms
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import path
 from django.contrib import messages
 from django.utils.safestring import mark_safe
@@ -127,8 +127,13 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
                 access.save()
 
                 messages.success(request, f'Acesso de teste criado com sucesso: {whatsapp} {access.password}')
-
-                return HttpResponseRedirect(access.whatsapp_message_link)
+                script = f"""
+                <script>
+                    window.open('{access.whatsapp_message_link}', '_blank');
+                    setTimeout(() => window.location.href = '../', 100);
+                </script>
+                """
+                return HttpResponse(script)
 
         return HttpResponseRedirect("../")
 

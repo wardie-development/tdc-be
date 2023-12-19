@@ -71,12 +71,11 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
     @property
     def whatsapp_message(self):
         whatsapp_line_break = "%0a"
-        return f"""
-_Agora você é um(a) Cliente PLUS da TDC!_{whatsapp_line_break}{whatsapp_line_break}
-A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}
-Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}
-Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%m/%Y às %H:%M")}h*
-            """
+
+        if not self.is_test_access:
+            return f'_Agora você é um(a) Cliente PLUS da TDC!_{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%m/%Y às %H:%M")}h*'
+
+        return f'*VERSÃO DEMONSTRATIVA*{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}⚠️ *Para demonstração, liberamos 10 modelos de cada marca*'
 
     def save(self, *args, **kwargs):
         self.renew_access()
