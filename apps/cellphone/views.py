@@ -53,7 +53,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
                 ip=ip,
                 user_agent=user_agent,
             )[0]
-            access_log.token = token
+            access_log.token = token.token
             access_log.save()
 
             return Response({"token": token.token})
