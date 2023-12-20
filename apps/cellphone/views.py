@@ -73,7 +73,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         names = Brand.objects.only("name", "is_active", "order").filter(is_active=True).order_by("order").values("name")
 
         if access.is_test_access:
-            names = names.filter(cellphones__is_visible_for_test=True)
+            names = names.filter(cellphones__is_visible_for_test=True).distinct()
 
         return Response(names)
 
