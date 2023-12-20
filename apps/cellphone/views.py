@@ -28,7 +28,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         ).access
 
         if access.is_test_access:
-            queryset = queryset.filter(cellphones__is_visible_for_test=True)
+            queryset = queryset.filter(cellphones__is_visible_for_test=True).distinct()
 
         return queryset
 
