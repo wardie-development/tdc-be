@@ -24,17 +24,14 @@ class BrandSerializer(serializers.ModelSerializer):
         ).access
 
         queryset = (
-            Cellphone.objects.filter(brand=instance).only("model", "compatibility_line")
+            Cellphone.objects.filter(brand=instance).only("model", "compatibility_line", "is_visible_for_test")
         )
-
-        if access.is_test_access:
-            queryset = queryset.filter(is_visible_for_test=True)
 
         cellphones = [
             {
                 "brand": instance.name,
                 "model": item.model,
-                "compatibilities": item.compatibility_line,
+                "compatibilities": "Disponível apenas na versão completa." if not item.is_visible_for_test and access.is_test_access else item.compatibility_line,
             }
             for item in queryset
         ]

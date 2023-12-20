@@ -56,7 +56,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             access_log.token = token.token
             access_log.save()
 
-            return Response({"token": token.token})
+            return Response({"token": token.token, "is_test_access": access.is_test_access})
         else:
             CellphoneAccessTry.objects.create(
                 ip=request.META.get("REMOTE_ADDR"),
