@@ -24,7 +24,7 @@ class BrandSerializer(serializers.ModelSerializer):
         ).access
 
         queryset = (
-            Cellphone.objects.filter(brand=instance).only("model", "compatibility_line", "is_visible_for_test")
+            Cellphone.objects.filter(brand=instance).only("model", "compatibility_line", "is_visible_for_test").order_by("created_at")
         )
 
         cellphones = [
