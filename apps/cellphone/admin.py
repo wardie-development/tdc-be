@@ -1,8 +1,7 @@
 from django.contrib import admin
-from django import forms
+from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import path
-from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 from apps.cellphone.models import (
@@ -18,10 +17,6 @@ from apps.cellphone.models import (
 class BrandAdmin(admin.ModelAdmin):
     list_display = ["name", "created_at", "updated_at", "is_active"]
     search_fields = ["name"]
-
-
-class CreateAccessForm(forms.ModelForm):
-    whatsapp = forms.CharField(label='Whatsapp')
 
 
 @admin.register(Cellphone)
@@ -99,7 +94,7 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
     )
     actions = ["renew_access"]
     list_display_links = ["client", "password"]
-    list_filter = ["days_to_expire", "created_at", "valid_until", "is_test_access"]
+    list_filter = ["days_to_expire", "valid_until", "is_test_access"]
     list_per_page = 10
     inlines = [CellphoneAccessLogInline]
 

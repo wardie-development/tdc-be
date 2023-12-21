@@ -177,7 +177,7 @@ class Cellphone(BaseModel):
 
 
 class CellphoneWriter(BaseModel):
-    UPDATE_STRING = "ATUALIZAR"
+    UPDATE_STRING = "CORRIGIR"
     ADD_STRING = "ADICIONAR"
     REMOVE_STRING = "REMOVER"
 
@@ -270,8 +270,8 @@ Marca Modelo: Marca Modelo 1 - Marca Modelo 2 - Marca Modelo 3 [dd/mm/YYYY]<br>
         self.delete()
 
     class Meta:
-        verbose_name = "Cadastrador de celulares"
-        verbose_name_plural = "Cadastrador de celulares"
+        verbose_name = "Cadastro de celulares"
+        verbose_name_plural = "Cadastro de celulares"
 
     def __str__(self):
         return "Cadastrador de celulares"
