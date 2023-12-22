@@ -13,14 +13,22 @@ from apps.cellphone.models import (
 )
 
 
+class AccessControlMixin:
+    def get_list_filter(self, request):
+        list_filter = super().get_list_filter(request)
+        if request.user.is_staff:
+            return []
+        return list_filter
+
+
 @admin.register(Brand)
-class BrandAdmin(admin.ModelAdmin):
+class BrandAdmin(AccessControlMixin, admin.ModelAdmin):
     list_display = ["name", "created_at", "updated_at", "is_active"]
     search_fields = ["name"]
 
 
 @admin.register(Cellphone)
-class CellphoneAdmin(admin.ModelAdmin):
+class CellphoneAdmin(AccessControlMixin, admin.ModelAdmin):
     list_display = ["brand_name", "model", "compatibility_line", "is_visible_for_test", "is_active"]
     search_fields = ["model", "brand__name", "compatibility_line"]
     fields = [
@@ -51,7 +59,7 @@ class CellphoneAdmin(admin.ModelAdmin):
 
 
 @admin.register(CellphoneWriter)
-class CellphoneWriterAdmin(admin.ModelAdmin):
+class CellphoneWriterAdmin(AccessControlMixin, admin.ModelAdmin):
     list_display = ["created_at", "updated_at", "is_active"]
     search_fields = ["input"]
     fields = [
@@ -76,7 +84,7 @@ class CellphoneAccessLogInline(admin.TabularInline):
 
 
 @admin.register(CellphoneAccess)
-class CellphoneAccessAdmin(admin.ModelAdmin):
+class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
     change_list_template = "admin/cellphone/change_list.html"
     list_display = [
         "client",
@@ -205,7 +213,7 @@ class CellphoneAccessAdmin(admin.ModelAdmin):
 
 
 @admin.register(CellphoneSuggestion)
-class CellphoneSuggestionAdmin(admin.ModelAdmin):
+class CellphoneSuggestionAdmin(AccessControlMixin, admin.ModelAdmin):
     list_display = ["name", "whatsapp", "suggestion", "created_at", "is_active"]
     search_fields = ["name", "whatsapp", "suggestion"]
     fieldsets = (("Criar Sugestão", {"fields": ("name", "whatsapp", "suggestion")}),)
@@ -213,7 +221,7 @@ class CellphoneSuggestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(CellphoneAccessTry)
-class CellphoneAccessTryAdmin(admin.ModelAdmin):
+class CellphoneAccessTryAdmin(AccessControlMixin, admin.ModelAdmin):
     list_display = ["ip", "user_agent", "password_tryed", "created_at"]
     search_fields = ["ip", "user_agent", "password_tryed"]
     readonly_fields = ["ip", "user_agent", "password_tryed", "created_at"]
