@@ -78,7 +78,8 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
         return f'*VERSÃO DEMONSTRATIVA*{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}⚠️ *Para demonstração, liberamos 10 modelos de cada marca*'
 
     def save(self, *args, **kwargs):
-        self.renew_access()
+        if not self.pk:
+            self.renew_access()
         super().save(*args, **kwargs)
 
     def renew_access(self):
