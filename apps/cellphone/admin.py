@@ -16,7 +16,7 @@ from apps.cellphone.models import (
 class AccessControlMixin:
     def get_list_filter(self, request):
         list_filter = super().get_list_filter(request)
-        if request.user.is_staff:
+        if request.user.is_staff and not request.user.is_superuser:
             return []
         return list_filter
 
