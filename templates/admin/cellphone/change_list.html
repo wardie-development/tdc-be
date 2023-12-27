@@ -1,4 +1,6 @@
 {% extends "admin/change_list.html" %}
+{% load has_expiry_today %}
+
 
 {% block search %}
     <style>
@@ -28,6 +30,11 @@
         .formRegisterTesteAccess__button:hover {
             background: #1e8e4b !important;
         }
+        #content-main .object-tools a.addlink {
+            background-color: #23a455;
+            border-color: #23a455;
+            color: #fff;
+        }
     </style>
     <div style="margin-bottom: 2px; display: flex; align-items: center; background: #3ec573; border-block: 1px solid #23a455; padding: 5px;">
         <form action="{% url 'admin:create-test-access' %}" method="post" class="formRegisterTesteAccess">
@@ -39,5 +46,142 @@
             </button>
         </form>
     </div>
+    {{ block.super }}
+{% endblock %}
+
+{% block result_list %}
+    <style>
+        .shadow {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+        .expireTodayPopUp {
+            background: #fff;
+            width: 30%;
+            height: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .expireTodayPopUp__titleGroup {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: #fff;
+            padding-block: 10px;
+        }
+        .titleGroup__title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+        #expireTodayPopUpCloseButton {
+            background-color: #cc0000;
+            color: #fff;
+            padding-inline: 10px;
+            padding-block: 5px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-inline: 10px;
+            border: 0;
+            cursor: pointer;
+        }
+        #expireTodayPopUpCloseButton:hover {
+            background-color: #a30000;
+        }
+        .expireTodayList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 100%;
+            overflow-y: scroll;
+        }
+        .expireTodayItem {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #fff;
+            color: #000;
+        }
+        .expireTodayItem:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+        .expireTodayItem:last-child {
+            border-bottom: 0;
+        }
+
+        @media (max-width: 1080px) {
+            .expireTodayPopUp {
+                width: 70%;
+                height: 70%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .expireTodayPopUp {
+                width: 90%;
+                height: 90%;
+            }
+        }
+
+
+    </style>
+    {% if cl.result_list|length > 0 and cl.result_list|has_expiry_today %}
+        <div class="shadow" id="expireTodayPopUp">
+            <section class="expireTodayPopUp">
+                <div class="expireTodayPopUp__titleGroup">
+                    <p class="titleGroup__title">Acessos que expiram Hoje</p>
+                    <button id="expireTodayPopUpCloseButton">Fechar</button>
+                </div>
+                <ul class="expireTodayList" style="margin: 0; padding: 0;">
+                    {% for obj in cl.result_list %}
+                        {% if obj.expires_today %}
+                            <li class="expireTodayItem">
+                                <p>{{ obj.client }} (<span style="font-weight: bold">{{ obj.whatsapp }}</span>)</p>
+                                <a
+                                    style="display: inline-block; background-color: #23a455; color: #fff; padding-inline: 10px; padding-block: 5px; border-radius: 5px; text-decoration: none; margin-inline: 10px;"
+                                    target="_blank"
+                                    href="{{ obj.whatsapp_expire_message_link }}"
+                                >
+                                    <img src="https://beeluvd.eu/wp-content/uploads/2014/09/send-icon-white.png" width=15/>
+                                    Entrar em contato
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
+    {% endif %}
+    <script>
+        function removePopUp() {
+            const element = document.getElementById('expireTodayPopUp');
+            element.style.display = 'none';
+        }
+        function closeExpireTodayPopup(e) {
+            e.preventDefault();
+            localStorage.setItem('lastSeeExpires', new Date().toISOString());
+            removePopUp();
+        }
+        document.getElementById('expireTodayPopUpCloseButton').addEventListener('click', closeExpireTodayPopup);
+        const lastSeeExpires = localStorage.getItem('lastSeeExpires');
+        const wasSseenOnLast24Hours = lastSeeExpires && new Date(lastSeeExpires) > new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+
+        if (wasSseenOnLast24Hours) {
+            removePopUp();
+        }
+    </script>
     {{ block.super }}
 {% endblock %}

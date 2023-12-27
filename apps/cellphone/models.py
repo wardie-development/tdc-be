@@ -77,6 +77,12 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
 
         return f'*VERSÃO DEMONSTRATIVA*{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}⚠️ *Para demonstração, liberamos 10 modelos de cada marca*'
 
+    @property
+    def whatsapp_expire_message(self):
+        whatsapp_line_break = "%0a"
+
+        return f'*Acesso expirado*{whatsapp_line_break}{whatsapp_line_break}Caro(a) cliente, seu acesso expirou. Estou entrando em contato para renovarmos o seu acesso a Tabela Plus!'
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.renew_access()
@@ -94,8 +100,19 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
     def whatsapp_message_link(self):
         whatsapp_link = "https://api.whatsapp.com/send"
         return (
-            f"{whatsapp_link}?phone=55{self.whatsapp}" f"&text={self.whatsapp_message}"
+            f"{whatsapp_link}?phone=55{self.whatsapp}&text={self.whatsapp_message}"
         )
+
+    @property
+    def whatsapp_expire_message_link(self):
+        whatsapp_link = "https://api.whatsapp.com/send"
+        return (
+            f"{whatsapp_link}?phone=55{self.whatsapp}&text={self.whatsapp_expire_message}"
+        )
+
+    @property
+    def expires_today(self):
+        return self.valid_until.date() == timezone.now().date()
 
 
 class CellphoneAccessLog(BaseModel):
