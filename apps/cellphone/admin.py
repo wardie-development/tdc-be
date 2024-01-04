@@ -133,7 +133,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
                 script = f"""
                 <script>
                     window.open('{access.whatsapp_message_link}', '_blank');
-                    setTimeout(() => window.location.href = '../', 100);
+                    setTimeout(() => window.location.href = '../', 1000);
                 </script>
                 """
                 return HttpResponse(script)
