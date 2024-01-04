@@ -164,24 +164,24 @@
                 </ul>
             </section>
         </div>
-    {% endif %}
-    <script>
-        function removePopUp() {
-            const element = document.getElementById('expireTodayPopUp');
-            element.style.display = 'none';
-        }
-        function closeExpireTodayPopup(e) {
-            e.preventDefault();
-            localStorage.setItem('lastSeeExpires', new Date().toISOString());
-            removePopUp();
-        }
-        document.getElementById('expireTodayPopUpCloseButton').addEventListener('click', closeExpireTodayPopup);
-        const lastSeeExpires = localStorage.getItem('lastSeeExpires');
-        const wasSseenOnLast24Hours = lastSeeExpires && new Date(lastSeeExpires) > new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+        <script>
+            function removePopUp() {
+                const element = document.getElementById('expireTodayPopUp');
+                element.style.display = 'none';
+            }
+            function closeExpireTodayPopup(e) {
+                e.preventDefault();
+                localStorage.setItem('lastSeeExpires', new Date().toISOString());
+                removePopUp();
+            }
+            document.getElementById('expireTodayPopUpCloseButton').addEventListener('click', closeExpireTodayPopup);
+            const lastSeeExpires = localStorage.getItem('lastSeeExpires');
+            const wasSseenOnLast24Hours = lastSeeExpires && new Date(lastSeeExpires) > new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
 
-        if (wasSseenOnLast24Hours) {
-            removePopUp();
-        }
-    </script>
+            if (wasSseenOnLast24Hours) {
+                removePopUp();
+            }
+        </script>
+    {% endif %}
     {{ block.super }}
 {% endblock %}
