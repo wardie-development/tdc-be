@@ -25,6 +25,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.user",
     "apps.cellphone",
+    "apps.orderlist",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
