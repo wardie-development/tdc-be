@@ -52,6 +52,9 @@ class CellphoneAccess(BaseModel):
     is_test_access = models.BooleanField(
         verbose_name="É acesso de teste?", default=False
     )
+    is_plus_access = models.BooleanField(
+        verbose_name="Versão Completa", default=True
+    )
     access_limit = models.PositiveIntegerField(
         verbose_name="Limite de acessos", default=5, help_text=(
             """
@@ -72,7 +75,7 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
     def whatsapp_message(self):
         whatsapp_line_break = "%0a"
 
-        if not self.is_test_access:
+        if self.is_plus_access:
             return f'_Agora você é um(a) Cliente PLUS da TDC!_{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página *Tabela de Películas [PLUS]* é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}Sua senha é válida até:{whatsapp_line_break}*{self.valid_until.strftime("%d/%m/%Y às %H:%M")}h*'
 
         return f'*VERSÃO DEMONSTRATIVA*{whatsapp_line_break}{whatsapp_line_break}A sua senha de acesso para a página é: *{self.password}*{whatsapp_line_break}{whatsapp_line_break}Link de acesso:{whatsapp_line_break}https://app.tecnicosdecelular.com.br/tabela-plus/{whatsapp_line_break}{whatsapp_line_break}⚠️ *Para demonstração, liberamos 10 modelos de cada marca*'

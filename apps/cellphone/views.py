@@ -27,7 +27,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             token=self.request.headers.get("Authorization")
         ).access
 
-        if access.is_test_access:
+        if not access.is_plus_access:
             queryset = queryset.filter(cellphones__is_visible_for_test=True).distinct()
 
         return queryset
@@ -56,7 +56,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             access_log.token = token.token
             access_log.save()
 
-            return Response({"token": token.token, "is_test_access": access.is_test_access})
+            return Response({"token": token.token, "is_test_access": not access.is_plus_access})
         else:
             CellphoneAccessTry.objects.create(
                 ip=request.META.get("REMOTE_ADDR"),
@@ -72,7 +72,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
         ).access
         names = Brand.objects.only("name", "is_active", "order").filter(is_active=True).order_by("order").values("name")
 
-        if access.is_test_access:
+        if not access.is_plus_access:
             names = names.filter(cellphones__is_visible_for_test=True).distinct()
 
         return Response(names)
@@ -98,7 +98,7 @@ class BrandViewSet(viewsets.ReadOnlyModelViewSet):
             news_views__whatsapp=access
         )
 
-        if access.is_test_access:
+        if not access.is_plus_access:
             news = news.filter(is_visible_for_test=True)
 
         data = CellphoneSerializer(news, many=True, context={"access": access}).data

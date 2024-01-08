@@ -31,7 +31,7 @@ class BrandSerializer(serializers.ModelSerializer):
             {
                 "brand": instance.name,
                 "model": item.model,
-                "compatibilities": "Disponível apenas na versão completa." if not item.is_visible_for_test and access.is_test_access else item.compatibility_line,
+                "compatibilities": "Disponível apenas na versão completa." if not item.is_visible_for_test and not access.is_plus_access else item.compatibility_line,
             }
             for item in queryset
         ]

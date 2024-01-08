@@ -92,17 +92,17 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
         "send_whatsapp_message",
         "valid_until",
         "status",
-        "is_test_access",
+        "is_plus_access",
         "edit",
         "delete"
     ]
     search_fields = ["whatsapp", "client", "password"]
     fieldsets = (
-        ("Criar Acesso", {"fields": ("client", "whatsapp", "days_to_expire", "access_limit", "password", "valid_until")}),
+        ("Criar Acesso", {"fields": ("client", "whatsapp", "is_plus_access", "days_to_expire", "access_limit", "password", "valid_until")}),
     )
     actions = ["renew_access"]
     list_display_links = ["client", "password"]
-    list_filter = ["days_to_expire", "valid_until", "is_test_access"]
+    list_filter = ["days_to_expire", "valid_until", "is_plus_access"]
     list_per_page = 10
     inlines = [CellphoneAccessLogInline]
 
@@ -124,7 +124,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
                 access = CellphoneAccess.objects.create(
                     client=f"Cliente - {whatsapp}",
                     whatsapp=whatsapp,
-                    is_test_access=True,
+                    is_plus_access=False,
                     days_to_expire="3"
                 )
                 access.save()
