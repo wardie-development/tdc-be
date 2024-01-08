@@ -102,7 +102,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
     )
     actions = ["renew_access"]
     list_display_links = ["client", "password"]
-    list_filter = ["days_to_expire", "valid_until", "is_plus_access"]
+    list_filter = ["was_converted", "days_to_expire", "valid_until", "is_plus_access"]
     list_per_page = 10
     inlines = [CellphoneAccessLogInline]
 

@@ -55,6 +55,9 @@ class CellphoneAccess(BaseModel):
     is_plus_access = models.BooleanField(
         verbose_name="Versão Completa", default=True
     )
+    was_converted = models.BooleanField(
+        verbose_name="Virou acesso PLUS?", default=False
+    )
     access_limit = models.PositiveIntegerField(
         verbose_name="Limite de acessos", default=5, help_text=(
             """
@@ -87,6 +90,15 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
         return f'*Acesso expirado*{whatsapp_line_break}{whatsapp_line_break}Caro(a) cliente, seu acesso expirou. Estou entrando em contato para renovarmos o seu acesso a Tabela Plus!'
 
     def save(self, *args, **kwargs):
+        old_access = (
+            CellphoneAccess.objects
+            .only("is_plus_access")
+            .filter(pk=self.pk)
+            .first()
+        )
+        if old_access and (not old_access.is_plus_access and self.is_plus_access):
+            self.was_converted = True
+
         if not self.pk:
             self.renew_access()
         super().save(*args, **kwargs)
