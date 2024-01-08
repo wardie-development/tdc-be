@@ -92,7 +92,7 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
     def save(self, *args, **kwargs):
         old_access = (
             CellphoneAccess.objects
-            .only("is_plus_access")
+            .only("is_plus_access", "days_to_expire")
             .filter(pk=self.pk)
             .first()
         )

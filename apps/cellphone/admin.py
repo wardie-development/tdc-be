@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.contrib import admin
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import path
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from apps.cellphone.models import (
@@ -100,7 +103,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
     fieldsets = (
         ("Criar Acesso", {"fields": ("client", "whatsapp", "is_plus_access", "days_to_expire", "access_limit", "password", "valid_until")}),
     )
-    actions = ["renew_access"]
+    actions = ["renew_access", "renew_to_30_days", "renew_to_90_days", "renew_to_180_days"]
     list_display_links = ["client", "password"]
     list_filter = ["was_converted", "days_to_expire", "valid_until", "is_plus_access"]
     list_per_page = 10
@@ -167,7 +170,27 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
             access.renew_access()
             access.save()
 
+    def renew_to_30_days(self, _request, queryset):
+        self.renew_to(queryset, 30)
+
+    def renew_to_90_days(self, _request, queryset):
+        self.renew_to(queryset, 90)
+
+    def renew_to_180_days(self, _request, queryset):
+        self.renew_to(queryset, 180)
+
     renew_access.short_description = "Renovar acesso"
+    renew_to_30_days.short_description = "Conceder acesso a tabela plus por 30 dias"
+    renew_to_90_days.short_description = "Conceder acesso a tabela plus por 90 dias"
+    renew_to_180_days.short_description = "Conceder acesso a tabela plus por 180 dias"
+
+    @staticmethod
+    def renew_to(queryset, days):
+        for access in queryset:
+            access.valid_until = timezone.now() + timedelta(days=days)
+            access.was_converted = True
+            access.is_plus_access = True
+            access.save()
 
     def edit(self, obj):
         edit_icon = "https://static-00.iconduck.com/assets.00/edit-icon-255x256-xzgn811y.png"
