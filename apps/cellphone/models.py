@@ -99,7 +99,7 @@ Abaixo você consegue ver todos os IPs usados para este cadastro. <br>
         if old_access and (not old_access.is_plus_access and self.is_plus_access):
             self.was_converted = True
 
-        if not self.pk:
+        if not self.pk or old_access.days_to_expire != self.days_to_expire:
             self.renew_access()
         super().save(*args, **kwargs)
 
