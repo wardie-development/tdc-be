@@ -180,9 +180,9 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
         self.renew_to(queryset, 180)
 
     renew_access.short_description = "Renovar acesso"
-    renew_to_30_days.short_description = "Conceder acesso a tabela plus por 30 dias"
-    renew_to_90_days.short_description = "Conceder acesso a tabela plus por 90 dias"
-    renew_to_180_days.short_description = "Conceder acesso a tabela plus por 180 dias"
+    renew_to_30_days.short_description = "Renovação +30 dias"
+    renew_to_90_days.short_description = "Renovação +90 dias"
+    renew_to_180_days.short_description = "Renovação +180 dias"
 
     @staticmethod
     def renew_to(queryset, days):
