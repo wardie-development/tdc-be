@@ -193,6 +193,15 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
             access.is_plus_access = True
             access.save()
 
+    # Put "remove access" action at last position:
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            actions["delete_selected"][0].short_description = "Remover acessos"
+            delete_selected = actions.pop("delete_selected")
+            actions["delete_selected"] = delete_selected
+        return actions
+
     def edit(self, obj):
         edit_icon = "https://static-00.iconduck.com/assets.00/edit-icon-255x256-xzgn811y.png"
         style = "display: inline-block; background-color: #417690; color: #fff; padding: 5px; border-radius: 5px; text-decoration: none; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center"
