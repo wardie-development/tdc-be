@@ -93,6 +93,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
         "client",
         "password",
         "send_whatsapp_message",
+        "created_at",
         "valid_until",
         "status",
         "is_plus_access",
