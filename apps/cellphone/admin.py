@@ -187,6 +187,7 @@ class CellphoneAccessAdmin(AccessControlMixin, admin.ModelAdmin):
     @staticmethod
     def renew_to(queryset, days):
         for access in queryset:
+            access.days_to_expire = str(days)
             access.valid_until = timezone.now() + timedelta(days=days)
             access.was_converted = True
             access.is_plus_access = True
